@@ -1,0 +1,92 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage[margin=1in]{geometry}
+\usepackage{bm}
+
+\newcommand{\bX}{\bm{X}}
+\newcommand{\bW}{\bm{W}}
+\newcommand{\by}{\bm{y}}
+\newcommand{\bbeta}{\bm{\beta}}
+\newcommand{\beps}{\bm{\varepsilon}}
+\newcommand{\bSigma}{\bm{\Sigma}}
+\newcommand{\bU}{\bm{U}}
+\newcommand{\bI}{\bm{I}}
+\newcommand{\bZ}{\bm{Z}}
+
+\begin{document}
+
+\section*{Data Generation Procedures}
+
+We consider the standard linear model
+\[
+  \by = \bX \bbeta + \beps, \qquad \beps \sim \mathcal{N}(\bm{0},\, \sigma^2 \bI_n),
+\]
+where $\bX \in \mathbb{R}^{n \times p}$ is the design matrix, $\bbeta \in \mathbb{R}^p$ is the coefficient vector, and $\beps \in \mathbb{R}^n$ is the noise vector with variance $\sigma^2$.
+
+\subsection*{Coefficient Vector $\bbeta$}
+
+Across all settings, $\bbeta$ is generated as a sparse Gaussian vector. Each entry $\beta_j$ is independently drawn as
+\[
+  \beta_j =
+  \begin{cases}
+    0 & \text{with probability } \kappa, \\
+    z_j & \text{with probability } 1 - \kappa,
+  \end{cases}
+  \qquad z_j \overset{\text{i.i.d.}}{\sim} \mathcal{N}\!\left(0,\, \frac{4}{p}\right),
+\]
+where $\kappa \in (0,1)$ controls the sparsity level.
+
+\subsection*{Covariance Structure: Standard Setting}
+
+In the standard setting, the covariance matrix $\bSigma \in \mathbb{R}^{p \times p}$ is block-diagonal with $B = 20$ blocks of equal size $p/B$. Each block follows an AR(1) structure: for the $b$-th block,
+\[
+  [\bSigma_b]_{ij} = \rho^{|i - j|}, \qquad 1 \le i, j \le p/B,
+\]
+where $\rho \in (0,1)$ is the autocorrelation coefficient (default $\rho = 0.6$). The full covariance matrix is
+\[
+  \bSigma = \mathrm{diag}(\bSigma_1, \bSigma_2, \ldots, \bSigma_B).
+\]
+Each row of $\bX$ is drawn independently as
+\[
+  \bm{x}_i \overset{\text{i.i.d.}}{\sim} \mathcal{N}(\bm{0},\, \bSigma), \qquad i = 1, \ldots, n.
+\]
+
+\subsection*{Heavy-Tailed Setting}
+
+In the heavy-tailed setting, the covariance structure $\bSigma$ remains the same block-diagonal AR(1) as above. The key difference is that each row of $\bX$ is drawn from a \emph{multivariate $t$-distribution} with $\nu$ degrees of freedom (default $\nu = 5$) instead of a Gaussian. Specifically,
+\[
+  \bm{x}_i = \sqrt{\frac{\nu - 2}{V_i}}\, \bm{z}_i, \qquad i = 1, \ldots, n,
+\]
+where
+\[
+  \bm{z}_i \overset{\text{i.i.d.}}{\sim} \mathcal{N}(\bm{0},\, \bSigma), \qquad V_i \overset{\text{i.i.d.}}{\sim} \chi^2_\nu,
+\]
+and $\bm{z}_i$ and $V_i$ are independent. The scaling by $\sqrt{(\nu-2)/V_i}$ ensures that $\mathrm{Cov}(\bm{x}_i) = \bSigma$ (which requires $\nu > 2$). Note that only the design matrix $\bX$ has heavy tails; the noise $\beps$ and the coefficients $\bbeta$ remain Gaussian.
+
+\subsection*{Long-Range Dependence Setting}
+
+In the long-range setting, the covariance matrix is augmented with a low-rank global component to introduce cross-block correlations. Specifically,
+\[
+  \bSigma = \bSigma_{\mathrm{block}} + \alpha\, \bU \bU^\top,
+\]
+where:
+\begin{itemize}
+  \item $\bSigma_{\mathrm{block}}$ is the standard block-diagonal AR(1) matrix described above,
+  \item $\bU \in \mathbb{R}^{p \times r}$ is a fixed random matrix with entries $U_{jk} \overset{\text{i.i.d.}}{\sim} \mathcal{N}(0,\, 1/p)$, generated with a fixed seed to ensure reproducibility,
+  \item $r$ is the rank of the global component (default $r = 5$),
+  \item $\alpha > 0$ controls the strength of the long-range dependence (default $\alpha = 0.1$).
+\end{itemize}
+The matrix $\bSigma$ is symmetrized via $\bSigma \leftarrow (\bSigma + \bSigma^\top)/2$ and is guaranteed positive definite since $\bSigma_{\mathrm{block}} \succ 0$ and $\alpha\, \bU \bU^\top \succeq 0$. Each row of $\bX$ is then drawn as
+\[
+  \bm{x}_i \overset{\text{i.i.d.}}{\sim} \mathcal{N}(\bm{0},\, \bSigma), \qquad i = 1, \ldots, n.
+\]
+
+\subsection*{Reference Panel $\bW$}
+
+In all three settings, a separate reference panel $\bW \in \mathbb{R}^{n_w \times p}$ is generated from the \emph{same} distribution as $\bX$ (Gaussian, heavy-tailed, or long-range, respectively) with $n_w$ samples. The regularized inverse is then computed as
+\[
+  \left(\bW^\top \bW + n_w \lambda \bI_p\right)^{-1},
+\]
+for a grid of regularization parameters $\lambda \in \{0.01, 0.01 + \Delta, \ldots, 10\}$ with 100 equally spaced values.
+
+\end{document}

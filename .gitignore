@@ -1,0 +1,37 @@
+# macOS / editor cruft
+.DS_Store
+*.swp
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.ipynb_checkpoints/
+
+# R
+.Rapp.history
+.Rhistory
+.RData
+.Ruserdata
+
+# LaTeX build artifacts (from data_generation_description.tex)
+*.aux
+*.log
+*.out
+*.synctex.gz
+
+# Large generated inputs that must NOT be committed
+# (regenerate locally with the 01_*_Generation scripts).
+# UK Biobank individual-level data is governed by a data-use agreement
+# and must never be added to this repository.
+Individual_Data/
+reference_panels/
+*.bk
+*.rds
+*.bed
+*.bim
+*.fam
+*.pgen
+*.pvar
+*.psam
