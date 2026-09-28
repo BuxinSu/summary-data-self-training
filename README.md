@@ -1,4 +1,4 @@
-# Self-training of summary data — code
+# Self-training of summary data — code and data
 
 Each folder owns one part of the analysis; every paper figure is produced by one
 entry in the table below.
@@ -11,9 +11,16 @@ entry in the table below.
 | `simulation/ridge/` | **Steps 2–4** — ridge self-training (standard design): `02_` train (`R²` over a `λ` grid) → `03_` aggregate over iterations → `04_` out-of-sample test. |
 | `simulation/stress_test/heavy_tail/`, `…/long_range/` | The same Step 1→4 chain under a heavy-tailed (`t₅`) design and a long-range-dependence design. |
 | `simulation/covariance_recovery/` | Covariance-recovery experiment: `‖Σ̂ − Σ‖` vs reference-panel size `n_w`. |
-| `realdata_ukbb/` | UK Biobank DXA pipeline (R): `step1` build LD + standardize GWAS sumstats → `step2` LDpred2 / lassosum2 fit + tuning → validation scripts. *(UKBB data is not redistributable.)* |
+| `realdata_ukbb/` | UK Biobank DXA pipeline (R): `step1` build LD + standardize GWAS sumstats → `step2` LDpred2 / lassosum2 fit + tuning → validation scripts. |
+| [`DXA/`](DXA/) | **Figure 2 raw data** — 100 iteration-level prediction $R^2$ values for each of 71 traits, comparing LDpred2-pseudo with individual-level LDpred2 at tuning sample sizes of 100, 500, and 1,000. |
 | `plots/` | Turn the results into the paper PDFs. |
 | `figures/` | The figures themselves — `main_text/` and `supplementary/`. |
+
+## Figure 2 raw data
+
+[`DXA/`](DXA/) contains the raw data for all three panels of Figure 2. The analysis uses GWAS summary statistics from 45,622 unrelated White British UK Biobank participants, approximately one million HapMap 3 variants, and a European-ancestry LD reference panel from the 1000 Genomes Project. LDpred2-pseudo uses an 8:2 pseudo-training-to-pseudo-validation ratio. Individual-level LDpred2 uses 100, 500, or 1,000 tuning samples from 2,618 unrelated White non-British participants, with the remaining samples used for testing both methods. Results are averaged across 100 random splits.
+
+See the [DXA README](DXA/README.md) for the experimental setup, file descriptions, trait identifiers, and how to recover the Figure 2 data points.
 
 ## Which code makes which figure
 
@@ -43,5 +50,5 @@ entry in the table below.
 
 ## Notes
 
-- `results/` CSVs are not shipped — regenerate them with the simulation chain before running `plots/`.
+- Generate simulation result CSVs with the simulation chain before running the corresponding scripts in `plots/`. Figure 2 raw data are provided in [`DXA/`](DXA/).
 - Scripts use placeholder cluster paths (`/path/to/summary_training/…`); edit those or the `argparse`/`optparse` flags for your environment.
